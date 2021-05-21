@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/parse", handler)
+	http.HandleFunc("/", handler)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		panic(err)
@@ -30,7 +30,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmd := exec.Command("mercury-parser", url)
+	format := getOptionalParameter(r.URL, "format", "text")
+	if !isValidFormat(format) {
+		err := fmt.Errorf("Invalid format: '%v'", format)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	cmd := exec.Command("mercury-parser", url, "--format="+format)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err = cmd.Run()
@@ -51,10 +58,20 @@ func getParameter(u *url.URL, name string) (string, error) {
 	return values[0], nil
 }
 
+func getOptionalParameter(u *url.URL, name string, defaultValue string) string {
+	values, ok := u.Query()[name]
+	if !ok || len(values[0]) < 1 {
+		return defaultValue
+	}
+	return values[0]
+}
+
 func isValidURL(url string) bool {
 	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
-	if re.MatchString(url) {
-		return true
-	}
-	return false
+	return re.MatchString(url)
+}
+
+func isValidFormat(format string) bool {
+	re := regexp.MustCompile(`^(html|markdown|text)$`)
+	return re.MatchString(format)
 }
