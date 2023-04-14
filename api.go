@@ -37,7 +37,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmd := exec.Command("mercury-parser", url, "--format="+format)
+	cmd := exec.Command("postlight-parser", url, "--format="+format)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err = cmd.Run()
