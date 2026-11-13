@@ -1,0 +1,12 @@
+--- a/dist/mercury.js
++++ b/dist/mercury.js
+@@ -1250,7 +1250,8 @@
+     var attrs = getAttrs(node);
+     var url = attrs[attr];
+     if (!url) return;
+-    var absoluteUrl = URL.resolve(baseUrl || rootUrl, url);
++    var absoluteUrl = url;
++    try { absoluteUrl = URL.resolve(baseUrl || rootUrl, url); } catch (e) {} // shortcut: legacy url.resolve throws on non-hierarchical schemes (mw-data:), keep the raw value; drop this patch when upstream fixes absolutize
+     setAttr(node, attr, absoluteUrl);
+   });
+ }
