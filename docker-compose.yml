@@ -1,4 +1,3 @@
-version: "2.2"
 services:
 
   web:
@@ -8,5 +7,19 @@ services:
     mem_limit: "4g"
     cap_drop:
       - ALL
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    pids_limit: 256
+    cpus: 2
+    ulimits:
+      nofile:
+        soft: 4096
+        hard: 8192
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     tmpfs:
-      - /tmp
+      - /tmp:noexec,nosuid,nodev,size=256m
